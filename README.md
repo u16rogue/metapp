@@ -1,5 +1,6 @@
 # metapp
 A library for C++ Metaprogramming, template, and other magical stuff under one utility header
+* *There are 2 libraries named `metapp` and `metapp-std`. The latter includes and uses the std/stl.*
 
 ## Project Usage
 * CMakeLists.txt
@@ -73,3 +74,40 @@ TBD
 
 ### (4.2) mpp::eq_all
 TBD
+
+### (5) mpp::impl_iterator<T>
+Fully implements C++ iterators with automatic implementation with minimum effort
+TBD
+
+### (6) mpp::task_dispatcher<mpp::default | mpp::signal_complete>
+Dispatch tasks on new/different threads
+TBD
+```c++
+static mpp::task_dispatcher<mpp::default> reader; // Value is true while the thread is running and turns false when it ends.
+if (!reader && renderer->button("Load file"))
+  reader = [&]() { value = read_file(text_input->text()); };
+else
+  renderer->text("Loading...");
+// ----
+// Value is true while thread is running and will stay true until the thread ends and `completed()` is called. completed() will remain false while the thread is running until it ends, when the thread ends completed() will return true, the next and consequent calls will return false. completed() will only be true once when the thread is completed.
+static mpp::task_dispatcher<mpp::signal_complete> reader; 
+static const char * text = "Load file";
+renderer->button(text);
+if (!reader && renderer->event->clicked())
+  reader = [&]() { value = read_file(text_input->text()); };
+else
+  renderer->text("Loading...");
+if (reader.completed())
+  value.file_close();
+```
+
+### (7) mpp_lock
+Scope based mutex lock - Locks a mutex within a given scope.
+```c++
+std::mutex x;
+int y = 0;
+// ...
+mpp_lock(x) {
+  ++y;
+};
+```
