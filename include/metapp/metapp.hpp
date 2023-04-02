@@ -101,13 +101,27 @@ auto normalize_lambda_from(T & lambda) -> auto
 // -----------------------------------------------------------------------------------------
 // --- Comptime String hash (FNV A1)
 
-namespace mpp {
+// TODO: Optimization idea is to receive expected length then calculate the rhs string's length while hashing,
+//       lemgth is compared by the delta between the starting cstr pointer and the current cstr. This elimantes
+//       the precall to details::strlen for the operator=='s
 
+namespace mpp {
 namespace details {
 
-constexpr auto fnv1a64(const char * str, int len) -> mpp::u64 {
+constexpr auto fnv1a64_partial(const char * str, const int exp_len) -> mpp::u64 {
+  const char * c = str;
+  str += exp_len;
   mpp::u64 h = 0xcbf29ce484222325;
-  while (--len && *str) {
+  while (*c && (c != str)) {
+    h = (h ^ *c) * 0x00000100000001B3;
+    ++c;
+  }
+  return h;
+}
+
+constexpr auto fnv1a64(const char * str) -> mpp::u64 {
+  mpp::u64 h = 0xcbf29ce484222325;
+  while (*str) {
     h = (h ^ *str) * 0x00000100000001B3;
     ++str;
   }
@@ -124,7 +138,7 @@ constexpr auto strlen(const char * str) -> mpp::u64 {
 
 struct cmphstr {
   consteval cmphstr(const char * str) {
-    v =  details::fnv1a64(str, details::strlen(str));
+    v =  details::fnv1a64(str);
   }
 
   constexpr auto operator==(const cmphstr rhs) const -> bool {
@@ -132,7 +146,7 @@ struct cmphstr {
   }
 
   constexpr auto operator==(const char * rhs) const -> bool {
-    return v == details::fnv1a64(rhs, details::strlen(rhs));
+    return v == details::fnv1a64(rhs);
   }
 
   mpp::u64 v;
@@ -140,9 +154,8 @@ struct cmphstr {
 
 struct cmphstr_partial {
   consteval cmphstr_partial(const char * str) {
-    mpp::u64 len = details::strlen(str);
-    v =  details::fnv1a64(str, len);
-    l = len;
+    l = details::strlen(str);
+    v =  details::fnv1a64(str);
   }
 
   constexpr auto operator==(const cmphstr_partial rhs) const -> bool {
@@ -150,7 +163,7 @@ struct cmphstr_partial {
   }
 
   constexpr auto operator==(const char * rhs) const -> bool {
-    return v == details::fnv1a64(rhs, l);
+    return v == details::fnv1a64_partial(rhs, l);
   }
 
   mpp::u64 v;
