@@ -13,3 +13,31 @@ struct __mpp_imm {
 };
 
 }
+
+namespace mpp {
+
+// Compile time string
+template <int sz>
+struct compstr {
+  consteval compstr(const char (&str_)[sz]) {
+    for (int i = 0; i < sz; ++i)
+      _data[i] = str_[i];
+  }
+
+  constexpr auto size() -> int {
+    return sz;
+  }
+
+  constexpr auto length() -> int {
+    return sz - 1;
+  }
+
+  constexpr auto data() -> const char * {
+    return _data;
+  }
+
+private:
+  char _data[sz] {};
+};
+
+}

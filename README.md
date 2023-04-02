@@ -111,3 +111,12 @@ mpp_lock(x) {
   ++y;
 };
 ```
+
+### (8) cmphstr and cmphstr_partial
+Compile time hashed string using FNV1A64 with partial hashing.
+```c++
+cmphstr("hello") == "hello"; // true
+cmphstr("hello") == "hallo"; // false
+cmphstr_partial("hello") == "hello"; // true
+cmphstr_partial("hello") == "hello world"; // true
+```

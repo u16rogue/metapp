@@ -83,7 +83,7 @@ struct lambda_abi
     provider.fn = &fn;
   }
 };
-}
+} // mpp::details
 
 template <typename T>
 auto normalize_lambda_now(T && lambda) -> auto
@@ -96,5 +96,66 @@ template <typename T>
 auto normalize_lambda_from(T & lambda) -> auto
 {}
 */
+} // mpp
+
+// -----------------------------------------------------------------------------------------
+// --- Comptime String hash (FNV A1)
+
+namespace mpp {
+
+namespace details {
+
+constexpr auto fnv1a64(const char * str, int len) -> mpp::u64 {
+  mpp::u64 h = 0xcbf29ce484222325;
+  while (--len && *str) {
+    h = (h ^ *str) * 0x00000100000001B3;
+    ++str;
+  }
+  return h;
 }
+
+constexpr auto strlen(const char * str) -> mpp::u64 {
+  mpp::u64 l = 0;
+  while (str[++l]);
+  return l + 1;
+}
+
+} // mpp::details
+
+struct cmphstr {
+  consteval cmphstr(const char * str) {
+    v =  details::fnv1a64(str, details::strlen(str));
+  }
+
+  auto operator==(const cmphstr rhs) const -> bool {
+    return v == rhs.v;
+  }
+
+  auto operator==(const char * rhs) const -> bool {
+    return v == details::fnv1a64(rhs, details::strlen(rhs));
+  }
+
+  mpp::u64 v;
+};
+
+struct cmphstr_partial {
+  consteval cmphstr_partial(const char * str) {
+    mpp::u64 len = details::strlen(str);
+    v =  details::fnv1a64(str, len);
+    l = len;
+  }
+
+  auto operator==(const cmphstr_partial rhs) const -> bool {
+    return v == rhs.v;
+  }
+
+  auto operator==(const char * rhs) const -> bool {
+    return v == details::fnv1a64(rhs, l);
+  }
+
+  mpp::u64 v;
+  mpp::u64 l;
+};
+
+} // mpp
 
