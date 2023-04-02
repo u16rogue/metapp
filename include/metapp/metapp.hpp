@@ -131,7 +131,7 @@ constexpr auto fnv1a64(const char * str) -> mpp::u64 {
 constexpr auto strlen(const char * str) -> mpp::u64 {
   mpp::u64 l = 0;
   while (str[++l]);
-  return l + 1;
+  return l;
 }
 
 } // mpp::details
@@ -155,7 +155,7 @@ struct cmphstr {
 struct cmphstr_partial {
   consteval cmphstr_partial(const char * str) {
     l = details::strlen(str);
-    v =  details::fnv1a64(str);
+    v = details::fnv1a64(str);
   }
 
   constexpr auto operator==(const cmphstr_partial rhs) const -> bool {
