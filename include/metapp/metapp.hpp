@@ -127,11 +127,11 @@ struct cmphstr {
     v =  details::fnv1a64(str, details::strlen(str));
   }
 
-  auto operator==(const cmphstr rhs) const -> bool {
+  constexpr auto operator==(const cmphstr rhs) const -> bool {
     return v == rhs.v;
   }
 
-  auto operator==(const char * rhs) const -> bool {
+  constexpr auto operator==(const char * rhs) const -> bool {
     return v == details::fnv1a64(rhs, details::strlen(rhs));
   }
 
@@ -145,11 +145,11 @@ struct cmphstr_partial {
     l = len;
   }
 
-  auto operator==(const cmphstr_partial rhs) const -> bool {
+  constexpr auto operator==(const cmphstr_partial rhs) const -> bool {
     return v == rhs.v;
   }
 
-  auto operator==(const char * rhs) const -> bool {
+  constexpr auto operator==(const char * rhs) const -> bool {
     return v == details::fnv1a64(rhs, l);
   }
 
