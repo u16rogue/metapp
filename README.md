@@ -32,7 +32,7 @@ target_link_libraries(
 
 ### (1) mpp_defer
 Defer statement - Executes code on scope exit
-                                                                                                                            
+
 Example Usage:
 ```c++
 print(" 1")
@@ -48,7 +48,7 @@ print(" 3");
 
 ### (2) mpp::array_size
 Array size - Determine size of array in n elements
-                                                                                                                         
+
 Example Usage:
 ```c++
 char x[256];
@@ -59,7 +59,7 @@ auto x = mpp::array_size(x); // x = 256
 Normalize lambda immediately - Allows a lambda with captures to have an ABI function pointer friendly callable function.
 
 **NOTE:** Requires the lambda to be mutable
-                                                                                                                         
+
 Example Usage:
 ```c++
 auto invoke(int(*)(int));
@@ -112,11 +112,33 @@ mpp_lock(x) {
 };
 ```
 
-### (8) cmphstr and cmphstr_partial
+### (8) CmpHStr and CmpHStrPartial
 Compile time hashed string using FNV1A64 with partial hashing.
 ```c++
-cmphstr("hello") == "hello"; // true
-cmphstr("hello") == "hallo"; // false
-cmphstr_partial("hello") == "hello"; // true
-cmphstr_partial("hello") == "hello world"; // true
+CmpHStr("hello") == "hello"; // true
+CmpHStr("hello") == "hallo"; // false
+CmpHStrPartial("hello") == "hello"; // true
+CmpHStrPartial("hello") == "hello world"; // true
+```
+
+### (9) Result
+Result container that can either contain a value or a failure status.
+```c++
+// This is optional if you want to add your own status.
+// Having 'SUCCESS = 0' and 'FAILURE = 1' is a requirement.
+enum class MyError { SUCCESS, FAILURE, TOO_LOW };
+auto get(int x) -> Result<SomeStruct, MyError> {
+  if (x < 10) return MyError::TOO_LOW;
+  return SomeStruct { x * 2 };
+}
+
+auto v = get(12);
+if (!v) {
+  switch (v.why()) {
+    ...
+  }
+  return -1;
+}
+
+return v->value + (*v).value;
 ```
