@@ -12,7 +12,7 @@ struct __mpp_imm {
   }
 };
 
-}
+} // namespace mpp::details
 
 namespace mpp {
 
@@ -40,4 +40,4 @@ private:
   char _data[sz] {};
 };
 
-}
+} // namespace mpp

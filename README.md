@@ -15,7 +15,7 @@ target_link_libraries(
 ```
 * Source
 ```c++
-#include <metapp/metapp.hpp>
+#include <metapp/metapp.hh>
 ```
 
 ## Features
