@@ -133,6 +133,9 @@ CmpHStrPartial("hello") == "hello world"; // true
 
 ### (9) Result
 Result container that can either contain a value or a failure status.
+> [!NOTE]
+> If `T` has a custom `->` defined `Result` will automatically chain its own `->` to `T`'s. You can disable this by setting `custom_arrow_operator_chaining` to false on its template parameter. What this does is in the case of `Result<std::unique_ptr<foo>> bar;` doing `bar->` will result to `foo` instead of `std::unique_ptr<foo>`.
+
 ```c++
 // This is optional if you want to add your own status.
 // Having 'SUCCESS = 0' and 'FAILURE = 1' is a requirement.

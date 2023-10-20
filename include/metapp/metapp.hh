@@ -14,6 +14,11 @@
 namespace mpp
 {
 
+template <typename T>
+concept ConstraintHasArrowOperator = requires (T a) {
+  a.operator->();
+};
+
 using  i8  = char;
 struct I8 { i8 value; };
 static_assert(
@@ -203,7 +208,10 @@ namespace details::result {
   };
 } // details::result
 
-template <typename T, typename S = details::result::Status>
+/*
+ *  Optional type with alternative value for lack of `T` presented by `S`
+ */
+template <typename T, typename S = details::result::Status, bool custom_arrow_operator_chaining = true>
 struct Result {
   using StatusType = S;
   static_assert(requires { S::SUCCESS; } && static_cast<int>(S::SUCCESS) == 0, "Invalid Status enumerator `S`. Must contain 'SUCCESS' and its value must be 0.");
@@ -277,26 +285,22 @@ struct Result {
   }
 
   explicit operator bool() const noexcept {
-    return success();
+    return successful();
+  }
+
+  auto operator->() -> T & requires (ConstraintHasArrowOperator<T> && custom_arrow_operator_chaining) {
+    return success_as_value_typed();
   }
 
   auto operator->() -> T * {
-    if (is_success) {
-      return &success_as_value_typed();
-    } else {
-      return nullptr;
-    }
+    return &success_as_value_typed();
   }
 
   auto operator*() -> T & {
-    if (is_success)  {
-      return success_as_value_typed();
-    } else {
-
-    }
+    return success_as_value_typed();
   }
 
-  auto success() const noexcept -> bool {
+  auto successful() const noexcept -> bool {
     return is_success;
   }
 
@@ -325,7 +329,7 @@ private:
       success_as_value_typed().~T();
     }
   }
-};
+}; // struct Result
 
 } // mpp
 
