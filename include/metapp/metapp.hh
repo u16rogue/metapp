@@ -75,13 +75,8 @@ namespace details
   };
 } // details
 
-#if defined(METAPP_DEFER_USE_LINE_NUMBER) && METAPP_DEFER_USE_LINE_NUMBER== 1
-  #define mpp_defer \
-    const mpp::details::__mpp_defer mpp_glue(__mpp_defer_, __LINE__)= [&]()
-#else
-  #define mpp_defer \
-    const mpp::details::__mpp_defer mpp_glue(__mpp_defer_, __COUNTER__)= [&]()
-#endif
+#define mpp_defer \
+  const mpp::details::__mpp_defer mpp_glue(__mpp_defer_, __LINE__)= [&]()
 
 //=========================================================================================
 //=== Array length
