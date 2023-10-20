@@ -1,22 +1,32 @@
 # metapp
-A library for C++ Metaprogramming, template, and other magical stuff under one utility header
+An all purpose C++ utility library for metaprogramming, templating, and other questionable things.
 * *There are 2 libraries named `metapp` and `metapp-std`. The latter includes and uses the std/stl.*
 
 ## Project Usage
 * CMakeLists.txt
-```cmake
-add_subdirectory(.../metapp)
-...
-target_link_libraries(
-  ${PROJECT_NAME}
-  ...
-  metapp
-)
-```
+  ```cmake
+  add_subdirectory(.../metapp)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE metapp
+  )
+  ```
+* CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
+  *Check the repo's latest release tag as I might forget to update this.*
+  ```cmake
+  CPMAddPackage("gh:u16rogue/metapp#v0.2.0-pre") 
+  if (NOT metapp_ADDED)
+    message(FATAL_ERROR "Your nice message here!")
+  endif()
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE metapp
+  )
+  ```
+<hr>
+
 * Source
-```c++
-#include <metapp/metapp.hh>
-```
+  ```c++
+  #include <metapp/metapp.hh>
+  ```
 
 ## Features
 
