@@ -13,7 +13,7 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
   *Check the repo's latest release tag as I might forget to update this.*
   ```cmake
-  CPMAddPackage("gh:u16rogue/metapp#v0.4.0-pre") 
+  CPMAddPackage("gh:u16rogue/metapp#v0.4.2-pre") 
   if (NOT metapp_ADDED)
     message(FATAL_ERROR "Your nice message here!")
   endif()
