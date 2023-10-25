@@ -136,21 +136,21 @@ auto normalize_lambda_now(T && lambda) -> auto
 //       the precall to details::strlen for the operator=='s
 namespace details {
 
-  constexpr auto fnv1a64_partial(const char * str, const int exp_len) -> mpp::u64 {
-    const char * c= str;
+  constexpr auto fnv1a64_partial(const char * str, const mpp::u64 exp_len) -> mpp::u64 {
+    const char * c = str;
     str += exp_len;
-    mpp::u64 h= 0xcbf29ce484222325;
+    mpp::u64 h = 0xcbf29ce484222325;
     while (*c && (c != str)) {
-      h= (h ^ *c) * 0x00000100000001B3;
+      h= (h ^ static_cast<mpp::u64>(*c)) * 0x00000100000001B3;
       ++c;
     }
     return h;
   }
 
   constexpr auto fnv1a64(const char * str) -> mpp::u64 {
-    mpp::u64 h= 0xcbf29ce484222325;
+    mpp::u64 h = 0xcbf29ce484222325;
     while (*str) {
-      h= (h ^ *str) * 0x00000100000001B3;
+      h= (h ^ static_cast<mpp::u64>(*str)) * 0x00000100000001B3;
       ++str;
     }
     return h;

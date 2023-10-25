@@ -13,7 +13,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_compile_options(${PROJECT_NAME}
-  PRIVATE
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:⋅-Wall⋅-Wextra⋅-Wpedantic⋅-Werror⋅-Wsign-conversion⋅-Wconversion>
-    $<$<CXX_COMPILER_ID:MSVC>:⋅/W4⋅/WX>
+  INTERFACE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>: -Wall -Wextra -Wpedantic -Werror -Wsign-conversion -Wconversion>
+    $<$<CXX_COMPILER_ID:MSVC>: /W4 /WX>
 )
