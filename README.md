@@ -1,6 +1,6 @@
 # metapp
 An all purpose C++ utility library for metaprogramming, templating, and other questionable things.
-* *There are 2 libraries named `metapp` and `metapp-std`. The latter includes and uses the std/stl.*
+* *There are 2 libraries named `metapp` and `metapp-std`. The latter includes and uses the std.*
 
 ## Project Usage
 * CMakeLists.txt
@@ -13,7 +13,7 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
   *Check the repo's latest release tag as I might forget to update this.*
   ```cmake
-  CPMAddPackage("gh:u16rogue/metapp#v0.4.2-pre") 
+  CPMAddPackage("gh:u16rogue/metapp#v0.5.0-pre") 
   if (NOT metapp_ADDED)
     message(FATAL_ERROR "Your nice message here!")
   endif()

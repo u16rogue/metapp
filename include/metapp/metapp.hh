@@ -1,87 +1,39 @@
 #pragma once
 
-#include "common.hh"
+#include <metapp/common.hh>
 
-//=========================================================================================
-//=== Comparison dispatch
-// TODO
-//=========================================================================================
-//=== Enum class bitwise operators
-// TODO
-//=========================================================================================
-//=== Fixed datatypes
-// TODO: static_assert to ensure data type is correct
 namespace mpp
 {
 
-template <typename T>
-concept ConstraintHasArrowOperator = requires (T a) {
-  a.operator->();
-};
-
-using  i8  = char;
 struct I8 { i8 value; };
-static_assert(
-  sizeof(i8) * 8 == 8 && sizeof(I8) * 8 == 8,
-  "Data type i8 and U8 did not match its expected type size.");
+static_assert(sizeof(I8) * 8 == 8, "Data type I8 did not match its expected type size.");
 
-using  u8  = unsigned char;
 struct U8 { u8 value; };
-static_assert(
-  sizeof(u8) * 8 == 8 && sizeof(U8) * 8 == 8,
-  "Data type u8 and U8 did not match its expected type size.");
+static_assert(sizeof(U8) * 8 == 8, "Data type U8 did not match its expected type size.");
 
-using  i16 = short;
 struct I16 { i16 value; };
-static_assert(
-  sizeof(i16) * 8 == 16 && sizeof(I16) * 8 == 16,
-  "Data type i16 and I16 did not match its expected type size.");
+static_assert(sizeof(I16) * 8 == 16, "Data type I16 did not match its expected type size.");
 
-using  u16 = unsigned short;
 struct U16 { u16 value; };
-static_assert(
-  sizeof(u16) * 8 == 16 && sizeof(U16) * 8 == 16,
-  "Data type u16 and U16 did not match its expected type size.");
+static_assert(sizeof(U16) * 8 == 16, "Data type U16 did not match its expected type size.");
 
-using  i32 = int;
 struct I32 { i32 value; };
-static_assert(
-  sizeof(i32) * 8 == 32 && sizeof(I32) * 8 == 32,
-  "Data type i32 and I32 did not match its expected type size.");
+static_assert(sizeof(I32) * 8 == 32, "Data type I32 did not match its expected type size.");
 
-using  u32 = unsigned int;
 struct U32 { u32 value; };
-static_assert(
-  sizeof(u32) * 8 == 32 && sizeof(U32) * 8 == 32,
-  "Data type u32 and U32 did not match its expected type size.");
+static_assert(sizeof(U32) * 8 == 32, "Data type U32 did not match its expected type size.");
 
-using  i64 = long long;
 struct I64 { i64 value; };
-static_assert(
-  sizeof(i64) * 8 == 64 && sizeof(I64) * 8 == 64,
-  "Data type i64 and I64 did not match its expected type size.");
+static_assert(sizeof(I64) * 8 == 64, "Data type I64 did not match its expected type size.");
 
-using  u64 = unsigned long long;
 struct U64 { u64 value; };
-static_assert(
-  sizeof(u64) * 8 == 64 && sizeof(U64) * 8 == 64,
-  "Data type u64 and U64 did not match its expected type size.");
+static_assert(sizeof(U64) * 8 == 64, "Data type U64 did not match its expected type size.");
 
 //=========================================================================================
 //=== Defer statement
-namespace details
-{
-  template <typename T>
-  struct __mpp_defer
-  {
-    __mpp_defer(T && fn_) : fn(fn_) {}
-    ~__mpp_defer() { fn(); }
-    T fn;
-  };
-} // details
 
 #define mpp_defer \
-  const mpp::details::__mpp_defer mpp_glue(__mpp_defer_, __LINE__)= [&]()
+  const mpp::details::__mpp_scope_out mpp_glue(__mpp_defer_, __LINE__)= [&]()
 
 //=========================================================================================
 //=== Array length
@@ -197,139 +149,6 @@ struct CmpHStrPartial {
   mpp::u64 v;
   mpp::u64 l;
 };
-
-//=========================================================================================
-//=== Results
-
-namespace details::result {
-  enum class Response {
-    SUCCESS = 0,
-    FAILURE = 1, // Unspecified failure
-  };
-} // details::result
-
-/*
- *  Optional type with alternative value for lack of `T` presented by `R`
- */
-template <typename T, typename R = details::result::Response, bool custom_arrow_operator_chaining = true>
-struct Result {
-  using ResponseType = R;
-  static_assert(requires { R::SUCCESS; } && static_cast<int>(R::SUCCESS) == 0, "Invalid Response enumerator `S`. Must contain 'SUCCESS' and its value must be 0.");
-  static_assert(requires { R::FAILURE; } && static_cast<int>(R::FAILURE) == 1, "Invalid Response enumerator `S`. Must contain 'FAILURE' and its value must be 1.");
-
-  Result()
-    : is_success(false), as_failure(R::FAILURE)
-  {}
-
-  // Direct `T` constructor
-  template <typename... VArgs>
-  Result(VArgs &&... args)
-    : is_success(true)
-  {
-    new (&success_as_value_typed()) T(static_cast<VArgs&&>(args)...);
-  }
-
-  // Move T constructor
-  Result(T && value)
-    : is_success(true)
-  {
-    new (&success_as_value_typed()) T(static_cast<T &&>(value));
-  }
-
-  // Copy T constructor
-  Result(const T & value)
-    : is_success(true)
-  {
-    new (&success_as_value_typed()) T(value);
-  }
-
-  // Move constructor
-  Result(Result && other) {
-    success_destructorcall_checked();
-    if (other.is_success) {
-      new (&success_as_value_typed()) T(static_cast<T &&>(other.success_as_value_typed()));
-      is_success = true;
-
-      other.is_success = false;
-      other.as_failure = R::FAILURE;
-    } else {
-      is_success = false;
-      as_failure = other.as_failure;
-    }
-  }
-
-  // Copy constructor
-  Result(const Result & other) {
-    success_destructorcall_checked();
-    if (other.is_success) {
-      new (&success_as_value_typed()) T(other);
-      is_success = true;
-    } else {
-      as_failure = other.as_failure;
-      is_success = false;
-    }
-  }
-
-  // Error constructor
-  Result(R response)
-    : is_success(false)
-  {
-    if (response == R::SUCCESS) {
-      response = R::FAILURE;
-    }
-    as_failure = response;
-  }
-
-  ~Result() {
-    success_destructorcall_checked();
-  }
-
-  explicit operator bool() const noexcept {
-    return successful();
-  }
-
-  auto operator->() -> T & requires (ConstraintHasArrowOperator<T> && custom_arrow_operator_chaining) {
-    return success_as_value_typed();
-  }
-
-  auto operator->() -> T * {
-    return &success_as_value_typed();
-  }
-
-  auto operator*() -> T & {
-    return success_as_value_typed();
-  }
-
-  auto successful() const noexcept -> bool {
-    return is_success;
-  }
-
-  auto why() const noexcept -> R {
-    if (!is_success) {
-      return as_failure;
-    } else {
-      return R::SUCCESS;
-    }
-  }
-
-private:
-  bool is_success;
-  union {
-    R  as_failure;
-    u8 as_success[sizeof(T)];
-  };
-  static_assert(sizeof(as_success) == sizeof(T), "Pseudo container for type `T` isn't properly aligned.");
-
-private:
-  auto success_as_value_typed() -> T & {
-    return *reinterpret_cast<T*>(&as_success);
-  }
-  auto success_destructorcall_checked() -> void {
-    if (is_success) {
-      success_as_value_typed().~T();
-    }
-  }
-}; // struct Result
 
 } // mpp
 
