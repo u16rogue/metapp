@@ -202,23 +202,23 @@ struct CmpHStrPartial {
 //=== Results
 
 namespace details::result {
-  enum class Status {
+  enum class Response {
     SUCCESS = 0,
     FAILURE = 1, // Unspecified failure
   };
 } // details::result
 
 /*
- *  Optional type with alternative value for lack of `T` presented by `S`
+ *  Optional type with alternative value for lack of `T` presented by `R`
  */
-template <typename T, typename S = details::result::Status, bool custom_arrow_operator_chaining = true>
+template <typename T, typename R = details::result::Response, bool custom_arrow_operator_chaining = true>
 struct Result {
-  using StatusType = S;
-  static_assert(requires { S::SUCCESS; } && static_cast<int>(S::SUCCESS) == 0, "Invalid Status enumerator `S`. Must contain 'SUCCESS' and its value must be 0.");
-  static_assert(requires { S::FAILURE; } && static_cast<int>(S::FAILURE) == 1, "Invalid Status enumerator `S`. Must contain 'FAILURE' and its value must be 1.");
+  using ResponseType = R;
+  static_assert(requires { R::SUCCESS; } && static_cast<int>(R::SUCCESS) == 0, "Invalid Response enumerator `S`. Must contain 'SUCCESS' and its value must be 0.");
+  static_assert(requires { R::FAILURE; } && static_cast<int>(R::FAILURE) == 1, "Invalid Response enumerator `S`. Must contain 'FAILURE' and its value must be 1.");
 
   Result()
-    : is_success(false), as_failure(S::FAILURE)
+    : is_success(false), as_failure(R::FAILURE)
   {}
 
   // Direct `T` constructor
@@ -251,7 +251,7 @@ struct Result {
       is_success = true;
 
       other.is_success = false;
-      other.as_failure = S::FAILURE;
+      other.as_failure = R::FAILURE;
     } else {
       is_success = false;
       as_failure = other.as_failure;
@@ -271,13 +271,13 @@ struct Result {
   }
 
   // Error constructor
-  Result(S status)
+  Result(R response)
     : is_success(false)
   {
-    if (status == S::SUCCESS) {
-      status = S::FAILURE;
+    if (response == R::SUCCESS) {
+      response = R::FAILURE;
     }
-    as_failure = status;
+    as_failure = response;
   }
 
   ~Result() {
@@ -304,18 +304,18 @@ struct Result {
     return is_success;
   }
 
-  auto why() const noexcept -> S {
+  auto why() const noexcept -> R {
     if (!is_success) {
       return as_failure;
     } else {
-      return S::SUCCESS;
+      return R::SUCCESS;
     }
   }
 
 private:
   bool is_success;
   union {
-    S  as_failure;
+    R  as_failure;
     u8 as_success[sizeof(T)];
   };
   static_assert(sizeof(as_success) == sizeof(T), "Pseudo container for type `T` isn't properly aligned.");

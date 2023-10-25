@@ -13,7 +13,7 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
   *Check the repo's latest release tag as I might forget to update this.*
   ```cmake
-  CPMAddPackage("gh:u16rogue/metapp#v0.2.0-pre") 
+  CPMAddPackage("gh:u16rogue/metapp#v0.4.0-pre") 
   if (NOT metapp_ADDED)
     message(FATAL_ERROR "Your nice message here!")
   endif()
@@ -139,10 +139,11 @@ Result container that can either contain a value or a failure status.
 ```c++
 // This is optional if you want to add your own status.
 // Having 'SUCCESS = 0' and 'FAILURE = 1' is a requirement.
+struct SomeStruct { SomeStruct(int); ... };
 enum class MyError { SUCCESS, FAILURE, TOO_LOW };
 auto get(int x) -> Result<SomeStruct, MyError> {
   if (x < 10) return MyError::TOO_LOW;
-  return SomeStruct { x * 2 };
+  return x * 2;
 }
 
 auto v = get(12);
