@@ -33,7 +33,7 @@ static_assert(sizeof(U64) * 8 == 64, "Data type U64 did not match its expected t
 //=== Defer statement
 
 #define mpp_defer \
-  const mpp::details::__mpp_scope_out mpp_glue(__mpp_defer_, __LINE__)= [&]()
+  const mpp::details::__mpp_scope_out mpp_glue(__mpp_defer_, __LINE__)= [&]() -> void
 
 //=========================================================================================
 //=== Array length
