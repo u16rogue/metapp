@@ -42,9 +42,8 @@ static_assert(sizeof(U64) * 8 == 64, "Data type U64 did not match its expected t
 // size= size in bytes
 // count= number of entries (active)
 // length= number of elements (all)
-template <typename T, int sz>
-constexpr auto array_length(const T(&)[sz]) -> mpp::u64
-{
+template <typename T, auto sz>
+constexpr auto array_length(const T(&)[sz]) -> mpp::u64 {
   return sz;
 }
 
@@ -53,8 +52,7 @@ constexpr auto array_length(const T(&)[sz]) -> mpp::u64
 namespace details
 {
   template <typename T, typename R, typename... P>
-  struct abi_provider
-  {
+  struct abi_provider {
     inline static T * fn;
     abi_provider(R(T::*)(P...)) {};
     static auto abi(P... p) -> R
@@ -68,8 +66,8 @@ namespace details
   {
     inline static auto provider= abi_provider(&T::operator());
     lambda_abi(T && lambda) {
-      static T fn= lambda;
-      provider.fn= &fn;
+      static T fn = lambda;
+      provider.fn = &fn;
     }
   };
 } // details

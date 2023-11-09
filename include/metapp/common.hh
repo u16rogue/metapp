@@ -36,18 +36,18 @@ using  u64 = unsigned long long; static_assert(sizeof(u64) * 8 == 64 , "Data typ
 //=========================================================================================
 //=== Compile time string
 
-template <int sz>
+template <auto sz>
 struct CompStr {
   consteval CompStr(const char (&str_)[sz]) {
-    for (int i = 0; i < sz; ++i)
+    for (decltype(sz) i = 0; i < sz; ++i)
       _data[i] = str_[i];
   }
 
-  constexpr auto size() -> int {
+  constexpr auto size() -> auto {
     return sz;
   }
 
-  constexpr auto length() -> int {
+  constexpr auto length() -> auto {
     return sz - 1;
   }
 
