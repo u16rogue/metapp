@@ -86,27 +86,30 @@ auto normalize_lambda_now(T && lambda) -> auto
 //       the precall to details::strlen for the operator=='s
 namespace details {
 
-  constexpr auto fnv1a64_partial(const char * str, const mpp::u64 exp_len) -> mpp::u64 {
-    const char * c = str;
+  template <typename T>
+  constexpr auto fnv1a64_partial(const T * str, const mpp::u64 exp_len) -> mpp::u64 {
+    const T * c = str;
     str += exp_len;
     mpp::u64 h = 0xcbf29ce484222325;
     while (*c && (c != str)) {
-      h= (h ^ static_cast<mpp::u64>(*c)) * 0x00000100000001B3;
+      h = (h ^ static_cast<mpp::u64>(*c)) * 0x00000100000001B3;
       ++c;
     }
     return h;
   }
 
-  constexpr auto fnv1a64(const char * str) -> mpp::u64 {
+  template <typename T>
+  constexpr auto fnv1a64(const T * str) -> mpp::u64 {
     mpp::u64 h = 0xcbf29ce484222325;
     while (*str) {
-      h= (h ^ static_cast<mpp::u64>(*str)) * 0x00000100000001B3;
+      h = (h ^ static_cast<mpp::u64>(*str)) * 0x00000100000001B3;
       ++str;
     }
     return h;
   }
 
-  constexpr auto strlen(const char * str) -> mpp::u64 {
+  template <typename T>
+  constexpr auto strlen(const T * str) -> mpp::u64 {
     mpp::u64 l= 0;
     while (str[++l]);
     return l;
@@ -116,15 +119,16 @@ namespace details {
 
 struct CmpHStr {
   consteval CmpHStr(const char * str) {
-    v=  details::fnv1a64(str);
+    v =  details::fnv1a64(str);
   }
 
   constexpr auto operator==(const CmpHStr rhs) const -> bool {
-    return v== rhs.v;
+    return v == rhs.v;
   }
 
-  constexpr auto operator==(const char * rhs) const -> bool {
-    return v== details::fnv1a64(rhs);
+  template <typename T>
+  constexpr auto operator==(const T * rhs) const -> bool {
+    return v == details::fnv1a64(rhs);
   }
 
   mpp::u64 v;
@@ -132,16 +136,17 @@ struct CmpHStr {
 
 struct CmpHStrPartial {
   consteval CmpHStrPartial(const char * str) {
-    l= details::strlen(str);
-    v= details::fnv1a64(str);
+    l = details::strlen(str);
+    v = details::fnv1a64(str);
   }
 
   constexpr auto operator==(const CmpHStrPartial rhs) const -> bool {
-    return v== rhs.v;
+    return v == rhs.v;
   }
 
-  constexpr auto operator==(const char * rhs) const -> bool {
-    return v== details::fnv1a64_partial(rhs, l);
+  template <typename T>
+  constexpr auto operator==(const T * rhs) const -> bool {
+    return v == details::fnv1a64_partial(rhs, l);
   }
 
   mpp::u64 v;
