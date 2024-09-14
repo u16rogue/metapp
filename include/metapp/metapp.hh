@@ -29,26 +29,15 @@ static_assert(sizeof(I64) * 8 == 64, "Data type I64 did not match its expected t
 struct U64 { u64 value; };
 static_assert(sizeof(U64) * 8 == 64, "Data type U64 did not match its expected type size.");
 
-//=========================================================================================
-//=== Defer statement
-
 #define mpp_defer \
   const mpp::details::__mpp_scope_out mpp_glue(__mpp_defer_, __LINE__)= [&]() -> void
 
-//=========================================================================================
-//=== Array length
-//
 // [15/10/2023 - rogue] NOTICE: Changed from size to length for better terminology.
-// size= size in bytes
-// count= number of entries (active)
-// length= number of elements (all)
 template <typename T, auto sz>
 constexpr auto array_length(const T(&)[sz]) -> mpp::u64 {
   return sz;
 }
 
-//=========================================================================================
-//=== Normalize Lambda
 namespace details
 {
   template <typename T, typename R, typename... P>
@@ -70,11 +59,10 @@ namespace details
       provider.fn = &fn;
     }
   };
-} // details
+} // mpp::details
 
 template <typename T>
-auto normalize_lambda_now(T && lambda) -> auto
-{
+auto normalize_lambda_now(T && lambda) -> auto {
   return details::lambda_abi<T>(static_cast<T &&>(lambda)).provider.abi;
 }
 
@@ -115,7 +103,7 @@ namespace details {
     return l;
   }
 
-} // details
+} // mpp::details
 
 struct CmpHStr {
   consteval CmpHStr(const char * str) {
