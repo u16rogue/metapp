@@ -11,7 +11,7 @@
 namespace mpp {
 
 namespace details::result {
-  enum class Reason {
+  enum class Reason : mpp::u8 {
     Failure,
     ResultInvalidated,
   };
@@ -88,6 +88,14 @@ struct Result {
     return ok();
   }
 
+  constexpr auto has_value() const noexcept -> bool {
+    return ok();
+  }
+
+  constexpr auto has_reason() const noexcept -> bool {
+    return !ok() && has_R;
+  }
+
   constexpr auto operator->() -> T& requires (ConstraintHasArrowOperator<T> && custom_arrow_operator_chaining) {
     return _unsafe_vT_ref();
   }
@@ -100,14 +108,14 @@ struct Result {
     return &_unsafe_vT_ref();
   }
 
-  constexpr auto access_result(const auto && callback) const noexcept -> Result& {
+  constexpr auto access_result(const auto && callback) /*const*/ noexcept -> Result& {
     if (ok()) {
       callback(_unsafe_vT_ref());
     }
     return *this;
   }
 
-  constexpr auto try_result(const auto && callback, auto & fallback) const noexcept -> auto& {
+  constexpr auto try_result(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
     if (ok()) {
       return callback(_unsafe_vT_ref());
     } else {
@@ -115,15 +123,15 @@ struct Result {
     }
   }
 
-  constexpr auto access_reason(const auto && callback) const noexcept -> Result& {
-    if (!ok() && has_R) {
+  constexpr auto access_reason(const auto && callback) /*const*/ noexcept -> Result& {
+    if (has_reason()) {
       callback(vR);
     }
     return *this;
   }
 
-  constexpr auto try_reason(const auto && callback, auto & fallback) const noexcept -> auto& {
-    if (!ok() && has_R) {
+  constexpr auto try_reason(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
+    if (has_reason()) {
       return callback(vR);
     } else {
       return fallback;
@@ -137,6 +145,7 @@ private:
   struct {
     bool is_ok : 1;
     bool has_R : 1; // Marked when Result is invalidated and ResultInvalidated is unavailable.
+    char _pad  : 6;
   };
   union {
     R  vR;
@@ -147,6 +156,10 @@ private:
 private:
   auto _unsafe_vT_ref() -> T& {
     return *reinterpret_cast<T*>(&_raw_vT);
+  }
+
+  auto _unsafe_vT_ref() const -> const T& {
+    return *reinterpret_cast<const T*>(&_raw_vT);
   }
 
   auto _unsafe_reason() const noexcept -> R {
