@@ -73,6 +73,7 @@ struct Result {
   // Error constructor
   constexpr Result(R reason)
     : has_T(false),
+      has_R(true),
       vR(reason)
   {}
 
