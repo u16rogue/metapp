@@ -98,9 +98,7 @@ Result container that can either contain a value of `T` or a reason enum of `R`.
 > If `T` has a custom `->` defined `Result` will automatically chain its own `->` to `T`'s. You can disable this by setting `custom_arrow_operator_chaining` to false on its template parameter. What this does is in the case of `Result<std::unique_ptr<foo>> bar;` doing `bar->` will result to `foo` instead of `std::unique_ptr<foo>`.
 
 ```c++
-// A default `Reason` is provided. If implementing
-// your own a `ResultInvalidated` enum is required.
-enum class Reason { AllocFail, ResultInvalidated, TooLow };
+enum class Reason { AllocFail, TooLow };
 struct Value { int value; };
 auto get(int x) -> Result<std::unique_ptr<Value>, Reason> {
   if (x < 10) return Reason::TooLow;
@@ -111,9 +109,10 @@ auto get(int x) -> Result<std::unique_ptr<Value>, Reason> {
 
 auto result = get(12);
 if (!result) {
-  log(result.try_reason([&](Reason r){
-    switch (r) { case...: return...; }
-  }, "No reason."));
+  log(result.try_transact_reason(
+    [&](Reason r){ switch (r) { case...: return...; } },
+    []{ return "No reason."; }
+  ));
   return -1;
 }
 
