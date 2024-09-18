@@ -29,50 +29,50 @@ struct Result {
   // Direct `T` constructor
   template <typename... VArgs>
   constexpr Result(VArgs &&... args)
-    : is_ok(true)
+    : has_T(true)
   {
     _unsafe_vT_constructor(static_cast<VArgs>(args)...);
   }
 
   // Move T constructor
   constexpr Result(T && value)
-    : is_ok(true)
+    : has_T(true)
   {
     _unsafe_vT_move_from(static_cast<T&&>(value));
   }
 
   // Copy T constructor
   constexpr Result(T & value)
-    : is_ok(true)
+    : has_T(true)
   {
     _unsafe_vT_copy_from(value);
   }
 
   // Move semantics
   constexpr Result(Result && other)
-    : is_ok(false)
+    : has_T(false)
   {
     _checked_move_semantic(static_cast<Result&&>(other));
   }
 
-  constexpr auto operator=(Result && other) -> Result& {
+  [[maybe_unused]] constexpr auto operator=(Result && other) -> Result& {
     return _checked_move_semantic(static_cast<Result&&>(other));
   }
 
   // Copy constructor
   constexpr Result(Result & other)
-    : is_ok(false)
+    : has_T(false)
   {
     _checked_copy_semantic(other);
   }
 
-  constexpr auto operator=(Result & other) -> Result& {
+  [[maybe_unused]] constexpr auto operator=(Result & other) -> Result& {
     return _checked_copy_semantic(other);
   }
 
   // Error constructor
   constexpr Result(R reason)
-    : is_ok(false),
+    : has_T(false),
       vR(reason)
   {}
 
@@ -81,7 +81,7 @@ struct Result {
   }
 
   constexpr auto ok() const noexcept -> bool {
-    return is_ok;
+    return has_T;
   }
 
   constexpr explicit operator bool() const noexcept {
@@ -108,14 +108,14 @@ struct Result {
     return &_unsafe_vT_ref();
   }
 
-  constexpr auto access_result(const auto && callback) /*const*/ noexcept -> Result& {
+  [[maybe_unused]] constexpr auto access_result(const auto && callback) /*const*/ noexcept -> Result& {
     if (ok()) {
       callback(_unsafe_vT_ref());
     }
     return *this;
   }
 
-  constexpr auto try_result(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
+  [[nodiscard]] constexpr auto try_result(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
     if (ok()) {
       return callback(_unsafe_vT_ref());
     } else {
@@ -123,14 +123,14 @@ struct Result {
     }
   }
 
-  constexpr auto access_reason(const auto && callback) /*const*/ noexcept -> Result& {
+  [[maybe_unused]] constexpr auto access_reason(const auto && callback) /*const*/ noexcept -> Result& {
     if (has_reason()) {
       callback(vR);
     }
     return *this;
   }
 
-  constexpr auto try_reason(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
+  [[nodiscard]] constexpr auto try_reason(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
     if (has_reason()) {
       return callback(vR);
     } else {
@@ -143,7 +143,7 @@ struct Result {
 
 private:
   struct {
-    bool is_ok : 1;
+    bool has_T : 1;
     bool has_R : 1; // Marked when Result is invalidated and ResultInvalidated is unavailable.
     char _pad  : 6;
   };
@@ -184,7 +184,7 @@ private:
   }
 
   auto _checked_vT_destructor() -> void {
-    if (is_ok) {
+    if (has_T) {
       _unsafe_vT_destructor();
     }
   }
@@ -193,10 +193,10 @@ private:
     _checked_invalidate();
     if (other.ok()) {
       _unsafe_vT_move_from(static_cast<T&&>(other._unsafe_vT_ref()));
-      is_ok = true;
+      has_T = true;
     } else {
       vR = other.vR;
-      is_ok = false;
+      has_T = false;
     }
     other._checked_invalidate();
     return *this;
@@ -206,10 +206,10 @@ private:
     _checked_vT_destructor();
     if (other.ok()) {
       _unsafe_vT_copy_from(other._unsafe_vT_ref());
-      is_ok = true;
+      has_T = true;
     } else {
       vR = other.vR;
-      is_ok = false;
+      has_T = false;
     }
     return *this;
   }
@@ -220,7 +220,7 @@ private:
 
   auto _checked_invalidate() noexcept -> void {
     _checked_vT_destructor();
-    is_ok = false;
+    has_T = false;
     if constexpr (_meta_reason_has_invalidate()) {
       has_R = true;
       vR = R::ResultInvalidated;
