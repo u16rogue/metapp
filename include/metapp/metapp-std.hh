@@ -187,7 +187,11 @@ private:
     return *reinterpret_cast<const T*>(&_raw_vT);
   }
 
-  auto _unsafe_vR_ref() const noexcept -> R& {
+  auto _unsafe_vR_ref() noexcept -> R& {
+    return vR;
+  }
+
+  auto _unsafe_vR_ref() const noexcept -> R {
     return vR;
   }
 
