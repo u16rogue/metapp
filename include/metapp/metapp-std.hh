@@ -12,8 +12,7 @@ namespace mpp {
 
 namespace details::result {
   enum class Reason : mpp::u8 {
-    Failure,
-    ResultInvalidated,
+    Unspecified,
   };
 } // mpp::details::result
 
@@ -24,7 +23,7 @@ template <typename T, typename R = details::result::Reason, bool custom_arrow_op
 struct Result {
   using ReasonType = R;
 
-  static_assert(requires { R::ResultInvalidated; }, "Result::ReasonType of R must have a `ResultInvalidated` enumerator.");
+  //static_assert(ConstraintEnumHasInvalidated<R>, "Result::ReasonType of R must have a `ResultInvalidated` enumerator.");
 
   // Direct `T` constructor
   template <typename... VArgs>
@@ -76,6 +75,10 @@ struct Result {
       has_R(true),
       vR(reason)
   {}
+
+  constexpr auto invalidate() noexcept -> void {
+    _checked_invalidate();
+  }
 
   constexpr ~Result() {
     _checked_invalidate();
@@ -145,7 +148,7 @@ struct Result {
 private:
   struct {
     bool has_T : 1;
-    bool has_R : 1; // Marked when Result is invalidated and ResultInvalidated is unavailable.
+    bool has_R : 1;
     char _pad  : 6;
   };
   union {
@@ -215,19 +218,10 @@ private:
     return *this;
   }
 
-  consteval auto _meta_reason_has_invalidate() const noexcept -> bool {
-    return requires { R::ResultInvalidated; };
-  }
-
   auto _checked_invalidate() noexcept -> void {
     _checked_vT_destructor();
     has_T = false;
-    if constexpr (_meta_reason_has_invalidate()) {
-      has_R = true;
-      vR = R::ResultInvalidated;
-    } else {
-      has_R = false;
-    }
+    has_R = false;
   }
 
 }; // struct Result
