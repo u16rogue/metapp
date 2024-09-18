@@ -131,11 +131,11 @@ struct Result {
     return *this;
   }
 
-  [[nodiscard]] constexpr auto try_transact_result(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
+  [[nodiscard]] constexpr auto try_transact_result(const auto && callback, const auto && fallback) /*const*/ noexcept -> auto& {
     if (ok()) {
       return callback(_unsafe_vT_ref());
     } else {
-      return fallback;
+      return fallback();
     }
   }
 
@@ -155,11 +155,11 @@ struct Result {
     return *this;
   }
 
-  [[nodiscard]] constexpr auto try_transact_reason(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
+  [[nodiscard]] constexpr auto try_transact_reason(const auto && callback, const auto && fallback) /*const*/ noexcept -> auto& {
     if (has_reason()) {
       return callback(_unsafe_vR_ref());
     } else {
-      return fallback;
+      return fallback();
     }
   }
 
