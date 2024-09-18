@@ -100,14 +100,17 @@ struct Result {
     return !ok() && has_R;
   }
 
+  // [2024.09.19.00.52 @u16rogue TODO] refactor this to default construct T when !has_value
   constexpr auto operator->() -> T& requires (ConstraintHasArrowOperator<T> && custom_arrow_operator_chaining) {
     return _unsafe_vT_ref();
   }
 
+  // [2024.09.19.00.52 @u16rogue TODO] refactor this to default construct T when !has_value
   constexpr auto operator*() -> T& {
     return _unsafe_vT_ref();
   }
 
+  // [2024.09.19.00.52 @u16rogue TODO] refactor this to default construct T when !has_value
   constexpr auto operator->() -> T* {
     return &_unsafe_vT_ref();
   }
@@ -115,6 +118,15 @@ struct Result {
   [[maybe_unused]] constexpr auto access_result(const auto && callback) /*const*/ noexcept -> Result& {
     if (ok()) {
       callback(_unsafe_vT_ref());
+    }
+    return *this;
+  }
+
+  [[maybe_unused]] constexpr auto access_result(const auto && callback, const auto && fallback) /*const*/ noexcept -> Result& {
+    if (ok()) {
+      callback(_unsafe_vT_ref());
+    } else {
+      fallback();
     }
     return *this;
   }
@@ -129,14 +141,23 @@ struct Result {
 
   [[maybe_unused]] constexpr auto access_reason(const auto && callback) /*const*/ noexcept -> Result& {
     if (has_reason()) {
-      callback(vR);
+      callback(_unsafe_vR_ref());
+    }
+    return *this;
+  }
+
+  [[maybe_unused]] constexpr auto access_reason(const auto && callback, const auto && fallback) /*const*/ noexcept -> Result& {
+    if (has_reason()) {
+      callback(_unsafe_vR_ref());
+    } else {
+      fallback();
     }
     return *this;
   }
 
   [[nodiscard]] constexpr auto try_transact_reason(const auto && callback, auto & fallback) /*const*/ noexcept -> auto& {
     if (has_reason()) {
-      return callback(vR);
+      return callback(_unsafe_vR_ref());
     } else {
       return fallback;
     }
@@ -166,7 +187,7 @@ private:
     return *reinterpret_cast<const T*>(&_raw_vT);
   }
 
-  auto _unsafe_reason() const noexcept -> R {
+  auto _unsafe_vR_ref() const noexcept -> R& {
     return vR;
   }
 
@@ -199,7 +220,7 @@ private:
       _unsafe_vT_move_from(static_cast<T&&>(other._unsafe_vT_ref()));
       has_T = true;
     } else {
-      vR = other.vR;
+      _unsafe_vR_ref() = other._unsafe_vR_ref();
       has_T = false;
     }
     other._checked_invalidate();
@@ -212,7 +233,7 @@ private:
       _unsafe_vT_copy_from(other._unsafe_vT_ref());
       has_T = true;
     } else {
-      vR = other.vR;
+      _unsafe_vR_ref() = other._unsafe_vR_ref();
       has_T = false;
     }
     return *this;
