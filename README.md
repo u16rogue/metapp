@@ -10,7 +10,7 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
   ```
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
   ```cmake
-  CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.8.0
+  CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.9.1
   if (NOT metapp_ADDED)
     message(FATAL_ERROR "...")
   endif()
