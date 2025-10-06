@@ -6,6 +6,8 @@
 !LICENSE
 
 !CMakeLists.txt
+!build.zig
+!build.zig.zon
 !include/
 !include/metapp
 !include/metapp/**

@@ -4,25 +4,45 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
 
 ## Project Usage
 * CMakeLists.txt
-  ```cmake
-  add_subdirectory(<path...>/metapp)
-  target_link_libraries(<target> PRIVATE metapp)
-  ```
+    ```cmake
+    add_subdirectory(<path...>/metapp)
+    target_link_libraries(<target> PRIVATE metapp)
+    ```
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
-  ```cmake
-  CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.10.0
-  if (NOT metapp_ADDED)
-    message(FATAL_ERROR "...")
-  endif()
-  target_link_libraries(<target> PRIVATE metapp)
-  ```
+    ```cmake
+    CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.10.1
+    if (NOT metapp_ADDED)
+      message(FATAL_ERROR "...")
+    endif()
+    target_link_libraries(<target> PRIVATE metapp)
+    ```
+* build.zig
+    *The build.zig is intended for including c++ libraries that rely on metapp. This library is a header only library and therefore has nothing to compile and use within zig itself.*
+    ```sh
+    zig fetch --save="metapp" https://github.com/u16rogue/metapp/archive/refs/tags/v0.10.1.tar.gz
+    ```
+    ```zig
+    const mpp = @import("metapp"); // ! import name is based off the set `save` name in the fetch command
+    pub fn build(b: *std.Build) void {
+        const dep_mpp = b.dependency("metapp", .{}); // !
+
+        const module = b.addModule(...);
+
+        mpp.addIncludeDirsTo(dep_mpp, module); // !
+        module.addCSourceFile(.{
+            .flags = &(.{ "some_flags" } ++ mpp.flags), // !
+            .file = b.dependency("cpplibthatusesmetapp", .{}).path("src/cppfilethatusesmetapp.cc")
+            .language = .cpp
+        });
+    }
+    ```
 <hr>
 
 * Source
-  ```c++
-  #include <metapp/metapp.hh>
-  #include <metapp/metapp-std.hh>
-  ```
+    ```c++
+    #include <metapp/metapp.hh>
+    #include <metapp/metapp-std.hh>
+    ```
 
 ## Features
 
@@ -44,8 +64,8 @@ Example Usage:
 print(" 1")
 int * x = new int;
 mpp_defer {
-  print(" 2");
-  delete x;
+    print(" 2");
+    delete x;
 };
 *x = 1;
 print(" 3");
@@ -79,7 +99,7 @@ std::mutex x;
 int y = 0;
 // ...
 mpp_lock(x) {
-  ++y;
+    ++y;
 };
 ```
 
