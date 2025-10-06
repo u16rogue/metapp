@@ -1,6 +1,6 @@
 # metapp
 An all purpose C++ utility library for metaprogramming, templating, and other questionable things.
-* *There are 2 libraries named `metapp` and `metapp-std`. The latter includes and uses the std.*
+* *There are 2 libraries named `metapp` and `metapp-std`. The latter may have implementations that use the standard library.*
 
 ## Project Usage
 * CMakeLists.txt
@@ -10,16 +10,17 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
     ```
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
     ```cmake
-    CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.10.1
+    CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.10.2
     if (NOT metapp_ADDED)
       message(FATAL_ERROR "...")
     endif()
     target_link_libraries(<target> PRIVATE metapp)
     ```
 * build.zig
+
     *The build.zig is intended for including c++ libraries that rely on metapp. This library is a header only library and therefore has nothing to compile and use within zig itself.*
     ```sh
-    zig fetch --save="metapp" https://github.com/u16rogue/metapp/archive/refs/tags/v0.10.1.tar.gz
+    zig fetch --save="metapp" https://github.com/u16rogue/metapp/archive/refs/tags/v0.10.2.tar.gz
     ```
     ```zig
     const mpp = @import("metapp"); // ! import name is based off the set `save` name in the fetch command

@@ -163,7 +163,7 @@ namespace mpp {
         //--------------------------------------------------------------------------------------------------
 
         [[maybe_unused]] constexpr auto valOkAccess(const auto && callback) /*const*/ noexcept -> Result& {
-            return valOkAccess(callback, []{});
+            return valOkAccess(static_cast<decltype(callback)&&>(callback), []{});
         }
 
         [[maybe_unused]] constexpr auto valOkAccess(const auto && callback, const auto && fallback) /*const*/ noexcept -> Result& {
@@ -203,16 +203,16 @@ namespace mpp {
         //--------------------------------------------------------------------------------------------------
 
         [[maybe_unused]] constexpr auto valErrAccess(const auto && callback) /*const*/ noexcept -> Result& {
-            return valErrAccess(callback, []{});
+            return valErrAccess(static_cast<decltype(callback)&&>(callback), []{});
         }
 
         [[maybe_unused]] constexpr auto valErrAccess(const auto && callback, const auto && fallback) /*const*/ noexcept -> Result& {
-            return valOkAccess(fallback, callback);
+            return valOkAccess(static_cast<decltype(fallback)&&>(fallback), static_cast<decltype(callback)&&>(callback));
         }
 
         template <typename Transact>
         [[nodiscard]] constexpr auto valErrTryTransact(const auto && callback, const auto && fallback) /*const*/ noexcept -> Transact {
-            return valOkTryTransact<Transact>(fallback, callback);
+            return valOkTryTransact<Transact>(static_cast<decltype(fallback)&&>(fallback), static_cast<decltype(callback)&&>(callback));
         }
 
         //--------------------------------------------------------------------------------------------------
@@ -341,6 +341,7 @@ namespace mpp {
     ///     * This implements the original behavior of <= 0.9.x `Result`
     template <typename Ok, typename Err = details::result::Reason, Err invalidated = details::result::Reason::Invalidated, bool custom_arrow_operator_chaining = true>
     struct InvalidatingResult : Result<Ok, Err, custom_arrow_operator_chaining> {
+        static_assert(false, "Not implemented");
         // TODO: implement
     };
 
