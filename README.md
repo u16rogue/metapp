@@ -10,7 +10,7 @@ An all purpose C++ utility library for metaprogramming, templating, and other qu
   ```
 * CMakeLists.txt - [CPM](https://github.com/cpm-cmake/CPM.cmake)
   ```cmake
-  CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.9.1
+  CPMAddPackage("gh:u16rogue/metapp@<tag>") # metapp@0.10.0
   if (NOT metapp_ADDED)
     message(FATAL_ERROR "...")
   endif()
@@ -94,29 +94,28 @@ CmpHStrPartial("hello") == "hello world"; // true
 
 ### Result
 Result container that can either contain a value of `T` or a reason enum of `R`.
-> [!NOTE]
-> If `T` has a custom `->` defined `Result` will automatically chain its own `->` to `T`'s. You can disable this by setting `custom_arrow_operator_chaining` to false on its template parameter. What this does is in the case of `Result<std::unique_ptr<foo>> bar;` doing `bar->` will result to `foo` instead of `std::unique_ptr<foo>`.
-
 ```c++
 enum class Reason { AllocFail, TooLow };
 struct Value { int value; };
 auto get(int x) -> Result<std::unique_ptr<Value>, Reason> {
-  if (x < 10) return Reason::TooLow;
-  auto r = std::make_unique<Value>(x * 2);
-  if (!r) return Reason::AllocFail;
-  return r;
+    if (x < 10) return Reason::TooLow;
+    auto r = std::make_unique<Value>(x * 2);
+    if (!r) return Reason::AllocFail;
+    return r;
 }
 
 auto result = get(12);
 if (!result) {
-  log(result.try_transact_reason(
-    [&](Reason r){ switch (r) { case...: return...; } },
-    []{ return "No reason."; }
-  ));
-  return -1;
+    log(result.valErrTryTransact(
+        [&](Reason r){ switch (r) { case...: return "Error: ..."; } },
+        []{ return "There is no error"; },
+    ));
 }
 
-return result->value + (*v).value;
+return result.valOkTryTransact(
+    [&]{ return result->value; },
+    []{ return -1; },
+);
 ```
 
 ### mpp::normalize_lambda_from
